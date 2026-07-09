@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN" class="ac-dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Canvas — 运营后台（本地复刻版）</title>
+  <meta name="description" content="fat-canvas-admin 运营后台一比一本地复刻，可离线交互与实时修改" />
+  <link rel="stylesheet" href="css/app.css" />
+  <script>
+    // 首屏前应用主题，避免闪白
+    (() => {
+      const saved = localStorage.getItem('ac-theme');
+      const mode = saved === 'light' ? 'light' : 'dark';
+      const root = document.documentElement;
+      root.classList.remove('ac-dark','ac-light');
+      root.classList.add(mode === 'light' ? 'ac-light' : 'ac-dark');
+    })();
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- 数据与菜单 -->
+  <script src="js/data.js"></script>
+  <script src="js/menu.js"></script>
+
+  <!-- 页面模块：依据 ROUTE_KEY 动态加载，缺失文件不会阻断 -->
+  <script>
+    window.Pages = window.Pages || {};
+    (function loadPages(){
+      const keys = Array.from(new Set(Object.values(window.ROUTE_KEY)));
+      let pending = keys.length;
+      function done(){ if(--pending<=0) loadCore(); }
+      keys.forEach(k=>{
+        const s=document.createElement('script');
+        s.src='js/pages/'+k+'.js';
+        s.onload=done; s.onerror=done;  // 缺失页面静默跳过，core 用占位渲染
+        document.body.appendChild(s);
+      });
+      if(!keys.length) loadCore();
+    })();
+    function loadCore(){
+      const s=document.createElement('script');
+      s.src='js/core.js';
+      document.body.appendChild(s);
+    }
+  </script>
+</body>
+</html>
